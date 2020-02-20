@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BlogEngine.PostManagement.Models.Posts.Configurations;
 using BlogEngine.PostManagement.Models.Posts.Contracts;
 using BlogEngine.PostManagement.Models.Posts.Repositories;
+using BlogEngine.Shared.Masstransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,6 +40,8 @@ namespace BlogEngine.PostManagement.API
                 sp.GetRequiredService<IOptions<MongoDbConfiguration>>().Value);
 
             services.AddSingleton<IPostRepository, PostRepository>();
+            services.AddSingleton<IEventDispatcher, MasstransitEventDispatcher>();
+
 
             services.AddSwaggerGen(c =>
             {

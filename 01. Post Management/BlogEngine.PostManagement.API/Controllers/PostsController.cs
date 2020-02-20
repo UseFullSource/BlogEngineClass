@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlogEngine.PostManagement.Models.Posts.Contracts;
 using BlogEngine.PostManagement.Models.Posts.Entities;
+using BlogEngine.Shared.Events.Posts;
+using BlogEngine.Shared.Masstransit;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,10 +16,12 @@ namespace BlogEngine.PostManagement.API.Controllers
     public class PostsController : Controller
     {
         private readonly IPostRepository _postRepository;
+        private readonly IEventDispatcher _eventDispatcher;
 
-        public PostsController(IPostRepository postRepository)
+        public PostsController(IPostRepository postRepository, IEventDispatcher eventDispatcher)
         {
             _postRepository = postRepository;
+            _eventDispatcher = eventDispatcher;
         }
 
         [HttpGet]
@@ -42,7 +46,17 @@ namespace BlogEngine.PostManagement.API.Controllers
         [HttpPost]
         public ActionResult<Post> Create(Post post)
         {
-            _postRepository.Create(post);            
+            _postRepository.Create(post);
+            _eventDispatcher.Dispatch(new PostAdded
+            {
+                Author = post.Author,
+                Body = post.Body,
+                Category = post.Category,
+                Id = post.Id,
+                Keywords = post.Keywords,
+                ShortDescription = post.ShortDescription,
+                Title = post.Title
+            });
             return CreatedAtRoute("GetPost", new { id = post.Id.ToString() }, post);
         }
 
